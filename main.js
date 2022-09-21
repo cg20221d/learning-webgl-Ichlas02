@@ -3,10 +3,10 @@ function main() {
     var gl = kanvas.getContext("webgl");
 
     var vertices = [
-        0.5, 0.5, 0.0, 1.0, 1.0,   // A: kanan atas    (BIRU LANGIT)
-        0.0, 0.0, 1.0, 0.0, 1.0,   // B: bawah tengah  (MAGENTA)
-        -0.5, 0.5, 1.0, 1.0, 0.0,  // C: kiri atas     (KUNING)
-        0.0, 1.0, 1.0, 1.0, 1.0    // D: atas tengah   (PUTIH)
+        0.3, 0.3, 0.0, 1.0, 1.0,   // A: kanan atas    (BIRU LANGIT)
+        0.3, -0.3, 1.0, 0.0, 1.0,   // B: bawah tengah  (MAGENTA)
+        -0.3, -0.3, 1.0, 1.0, 0.0,  // C: kiri atas     (KUNING)
+        -0.3, 0.3, 1.0, 1.0, 1.0    // D: atas tengah   (PUTIH)
     ];
 
     var buffer = gl.createBuffer();
@@ -20,8 +20,8 @@ function main() {
     uniform float uTheta;
     varying vec3 vColor;
     void main() {
-        float x = -sin(uTheta) * aPosition.x + cos(uTheta) * aPosition.x;
-        float y = cos(uTheta) * aPosition.y + sin(uTheta) * aPosition.y;
+        float x = -sin(uTheta) * aPosition.y + cos(uTheta) * aPosition.x;
+        float y = cos(uTheta) * aPosition.y + sin(uTheta) * aPosition.x;
         gl_Position = vec4(x, y, 0.0, 1.0);
         vColor = aColor;
     }
@@ -50,6 +50,13 @@ function main() {
 
     // Variabel lokal
     var theta = 0.0;
+    var freeze = false;
+    var up = false;
+    var down = false;
+    var left = false;
+    var right = false;
+    var x = window.innerWidth/2-130/2,
+    y = window.innerHeight/2-130/2;
 
     // Variabel pointer ke GLSL
     var uTheta = gl.getUniformLocation(shaderProgram, "uTheta");
@@ -67,15 +74,53 @@ function main() {
         5 * Float32Array.BYTES_PER_ELEMENT, 
         2 * Float32Array.BYTES_PER_ELEMENT);
     gl.enableVertexAttribArray(aColor);
-    
-function render(){
+
+    // Grafika Interaktif
+    function onMouseClick(event) {
+        freeze = !freeze;
+    }
+    document.addEventListener("click", onMouseClick, false);
+
+    document.addEventListener("keydown", press);
+    document.addEventListener("keyup", release);
+
+    function press(event) {
+        if (event.keyCode === 65) { left = true  ; }
+        if (event.keyCode === 68) { right = true  ; }
+        if (event.keyCode === 87) { up = true  ; }
+        if (event.keyCode === 83) { down = true  ; }
+    }
+
+    function release(event) {
+        if (event.keyCode === 65) { left = false  ; }
+        if (event.keyCode === 68) { right = false  ; }
+        if (event.keyCode === 87) { up = false  ; }
+        if (event.keyCode === 83) { down = false  ; }
+    }
+
+    function render(){
         gl.clearColor(0.2,      0.2,    0.4,    1.0);
         //            Merah     Hijau   Biru    Transparansi
         gl.clear(gl.COLOR_BUFFER_BIT);
-        theta += 0.1;
-        gl.uniform1f(uTheta, theta); //1f karena hanya 1 float yang dianimasikan
+        if(!freeze){
+            theta += 0.1;
+            gl.uniform1f(uTheta, theta); //1f karena hanya 1 float yang dianimasikan
+        }
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
-        requestAnimationFrame(render);
+        if (up){
+            theta = y + 10;
+        }
+        if (right){
+            theta = x + 10;
+        }
+        if (down){
+            theta = y - 10;
+        }
+        if (left){
+            theta = x - 10;
+        }
+        window.requestAnimationFrame(render);
     }
-requestAnimationFrame(render);
+window.requestAnimationFrame(render);
+// setInterval(render, 3000/144);
 }
