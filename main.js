@@ -18,11 +18,20 @@ function main() {
     attribute vec2 aPosition;
     attribute vec3 aColor;
     uniform float uTheta;
+    uniform vec2 uDelta;
     varying vec3 vColor;
     void main() {
-        float x = -sin(uTheta) * aPosition.y + cos(uTheta) * aPosition.x;
-        float y = cos(uTheta) * aPosition.y + sin(uTheta) * aPosition.x;
-        gl_Position = vec4(x, y, 0.0, 1.0);
+        // float x = -sin(uTheta) * aPosition.y + cos(uTheta) * aPosition.x;
+        // float y = cos(uTheta) * aPosition.y + sin(uTheta) * aPosition.x;
+        // gl_Position = vec4(x + uDelta.x, y + uDelta.y, 0.0, 1.0);
+        
+        vec2 position = aPosition;
+        vec3 d = vec3(0.5, -0.5, 0.0);
+        mat4 translation = mat4(1.0, 0.0, 0.0, 0.0,
+                                0.0, 1.0, 0.0, 0.0,
+                                0.0, 0.0, 1.0, 0.0,
+                                d.x, d.y, d.z, 1.0);
+        gl_Position = translation * vec4(position, 0.0, 1.0);
         vColor = aColor;
     }
     `;
@@ -119,8 +128,8 @@ function main() {
         if (left){
             theta = x - 10;
         }
-        window.requestAnimationFrame(render);
+        // window.requestAnimationFrame(render);
     }
-window.requestAnimationFrame(render);
-// setInterval(render, 3000/144);
+// window.requestAnimationFrame(render);
+setInterval(render, 4000/200);
 }
